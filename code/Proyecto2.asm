@@ -6,6 +6,11 @@ datos segment para public 'data'
     cad        db "Ingrese su nombre: $"
     bienvenida db "Bienvenido al programa, $"
     nombre     db 30 dup('$')     ; buffer para el nombre
+    m1 db "Ingresa una opción: $"
+    opc1 db "1. Conversión de números. $"
+    opc2 db "2. Clasificar un número. $"
+    opc3 db "3. Calcular la raíz cuadrada de un número. $"
+    numero db "Ingresa un número (0 - 65535): $"
 datos ends
 
 codigo segment para public 'code'
