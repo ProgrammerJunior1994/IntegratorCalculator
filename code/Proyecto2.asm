@@ -6,6 +6,10 @@ datos segment para public 'data'
     cad        db "Ingrese su nombre: $"
     bienvenida db "Bienvenido al programa, $"
     nombre     db 30 dup('$')     ; buffer para el nombre
+    msg1 db "Ingrese un numero (0-65535): $"
+    msg2 db 13,10,"Raiz aproximada: $"
+    num  dw ?
+    aprox dw ?
 datos ends
 
 codigo segment para public 'code'
@@ -78,6 +82,49 @@ fin_lectura:
     mov dl,10
     mov ah,02h
     int 21h
+
+    ; Mostrar mensaje
+    lea dx, msg1
+    mov ah, 09h
+    int 21h
+
+    ; Leer número desde teclado (simplificado: aquí deberías implementar rutina para convertir cadena a número)
+    ; Para ejemplo, cargamos un valor fijo:
+    mov num, 400      ; N = 400
+
+    ; Aproximación inicial: N/2
+    mov ax, num
+    mov cx, 2
+    div cx            ; AX = N/2
+    mov aprox, ax
+
+    ; Iteraciones del método babilónico
+    mov cx, 5         ; repetir 5 veces
+iteracion:
+    mov ax, num
+    mov bx, aprox
+    div bx            ; AX = N / aprox
+    add ax, aprox     ; AX = aprox + (N/aprox)
+    shr ax, 1         ; AX = (aprox + N/aprox)/2
+    mov aprox, ax
+    loop iteracion
+
+    ; Mostrar mensaje resultado
+    lea dx, msg2
+    mov ah, 09h
+    int 21h
+
+    ; Convertir aprox a texto e imprimir (rutina aparte)
+    ; Aquí solo mostramos un carácter como ejemplo
+    mov ax, aprox
+    add ax, '0'
+    mov dl, al
+    mov ah, 02h
+    int 21h
+
+    ; Terminar programa
+   ; mov ah, 4Ch
+    ;int 21h
 
     mov ah,07h
     int 21h
