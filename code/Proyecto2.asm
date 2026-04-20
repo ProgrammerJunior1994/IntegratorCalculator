@@ -10,6 +10,11 @@ datos segment para public 'data'
     msg2 db 13,10,"Raiz aproximada: $"
     num  dw ?
     aprox dw ?
+    m1 db "Ingresa una opción: $"
+    opc1 db "1. Conversión de números. $"
+    opc2 db "2. Clasificar un número. $"
+    opc3 db "3. Calcular la raíz cuadrada de un número. $"
+    numero db "Ingresa un número (0 - 65535): $"
 datos ends
 
 codigo segment para public 'code'
@@ -82,7 +87,7 @@ fin_lectura:
     mov dl,10
     mov ah,02h
     int 21h
-
+ ;aqui debe ir el codigo para procesar la raiz cuadrada
     ; Mostrar mensaje
     lea dx, msg1
     mov ah, 09h
@@ -122,9 +127,6 @@ iteracion:
     mov ah, 02h
     int 21h
 
-    ; Terminar programa
-   ; mov ah, 4Ch
-    ;int 21h
 
     mov ah,07h
     int 21h
