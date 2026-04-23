@@ -4,136 +4,290 @@ pila ends
 
 datos segment para public 'data'
     cad        db "Ingrese su nombre: $"
-    bienvenida db "Bienvenido al programa, $"
-    nombre     db 30 dup('$')     ; buffer para el nombre
-<<<<<<< HEAD
-    msg1 db "Ingrese un numero (0-65535): $"
-    msg2 db 13,10,"Raiz aproximada: $"
+    bienvenida db 13,10,"Bienvenido, $"
+    nombre     db 30 dup('$')
+
+    m1 db 13,10,"Ingresa una opcion:$"
+    opc1 db 13,10,"1. Conversion a binario$"
+    opc2 db 13,10,"2. Clasificar numero (par/impar)$"
+    opc3 db 13,10,"3. Raiz cuadrada$"
+    opc4 db 13,10,"4. Salir$"
+
+    numero db 13,10,"Ingresa un numero (0-65535): $"
+    msgBin db 13,10,"Binario: $"
+    msgPar db 13,10,"Es PAR$"
+    msgImpar db 13,10,"Es IMPAR$"
+    msgRaiz db 13,10,"Raiz aproximada: $"
+
     num  dw ?
     aprox dw ?
-=======
->>>>>>> 5d2ec6d1c57369d35f304520de600a5ff221d29f
-    m1 db "Ingresa una opción: $"
-    opc1 db "1. Conversión de números. $"
-    opc2 db "2. Clasificar un número. $"
-    opc3 db "3. Calcular la raíz cuadrada de un número. $"
-    numero db "Ingresa un número (0 - 65535): $"
 datos ends
 
 codigo segment para public 'code'
-    public compa
+public compa
+
 compa proc far
-    assume cs:codigo, ds:datos, ss:pila
-    push ds
-    mov ax,0
-    push ax
+assume cs:codigo, ds:datos, ss:pila
 
-    mov ax,datos
-    mov ds,ax
-    mov es,ax       ; <-- ahora stosb escribe en datos
+push ds
+mov ax,0
+push ax
 
-    ; Limpia pantalla
-    mov ah,06h
-    mov al,0
-    mov bh,07h
-    mov cx,0000h
-    mov dx,184Fh
-    int 10h
+mov ax,datos
+mov ds,ax
+mov es,ax
 
-    ; Mueve cursor a fila 1, col 1
-    mov ah,02h
-    mov bh,0
-    mov dh,1
-    mov dl,1
-    int 10h
+; ===== LIMPIAR =====
+mov ah,06h
+mov al,0
+mov bh,07h
+mov cx,0000h
+mov dx,184Fh
+int 10h
 
-    ; Mostrar mensaje de entrada
-    lea dx,cad
-    mov ah,09h
-    int 21h
+; ===== PEDIR NOMBRE =====
+lea dx,cad
+mov ah,09h
+int 21h
 
-    ; Capturar nombre
-    lea di,nombre
+lea di,nombre
 leer:
     mov ah,01h
     int 21h
-    cmp al,13          ; Enter?
+    cmp al,13
     je fin_lectura
-    stosb              ; guardar carácter en 'nombre'
+    stosb
     jmp leer
 
 fin_lectura:
     mov al,'$'
-    stosb              ; terminar la cadena con $
+    stosb
 
-    ; Mostrar mensaje de bienvenida
-    lea dx,bienvenida
+inicio:
+
+; ===== MENU =====
+lea dx,bienvenida
+mov ah,09h
+int 21h
+
+lea dx,nombre
+mov ah,09h
+int 21h
+
+lea dx,m1
+mov ah,09h
+int 21h
+
+lea dx,opc1
+mov ah,09h
+int 21h
+
+lea dx,opc2
+mov ah,09h
+int 21h
+
+lea dx,opc3
+mov ah,09h
+int 21h
+
+lea dx,opc4
+mov ah,09h
+int 21h
+
+; ===== LEER OPCION =====
+mov ah,01h
+int 21h
+
+cmp al,'1'
+jne op2
+call conversion
+jmp inicio
+
+op2:
+cmp al,'2'
+jne op3
+call clasificacion
+jmp inicio
+
+op3:
+cmp al,'3'
+jne op4
+call raiz
+jmp inicio
+
+op4:
+cmp al,'4'
+jne inicio
+jmp salir
+
+; ============================================
+; ===== LEER NUMERO ==========================
+; ============================================
+leer_numero proc
+    xor bx,bx
+
+leer_dig:
+    mov ah,01h
+    int 21h
+    cmp al,13
+    je fin_leer
+
+    sub al,30h
+    mov ah,0         ; AX = dígito
+
+    push ax          ; guardar dígito
+
+    mov ax,bx
+    mov cx,10
+    mul cx           ; AX = numero * 10
+
+    pop dx           ; recuperar dígito
+    add ax,dx        ; AX = numero*10 + digito
+
+    mov bx,ax
+    jmp leer_dig
+
+fin_leer:
+    mov ax,bx
+    ret
+leer_numero endp
+
+; ============================================
+; ===== CONVERSION BINARIO ===================
+; ============================================
+conversion proc
+    lea dx,numero
     mov ah,09h
     int 21h
 
-    ; Mueve cursor a fila 2, col 20
-    mov ah,02h
-    mov bh,0
-    mov dh,2
-    mov dl,23
-    int 10h
+    call leer_numero
 
-    ; Mostrar el nombre ingresado
-    lea dx,nombre
+    lea dx,msgBin
     mov ah,09h
     int 21h
 
-    ; Nueva línea
-    mov dl,13
+    mov cx,16
+bin_loop:
+    shl ax,1
+    jc uno
+
+    mov dl,'0'
+    jmp imprimir
+
+uno:
+    mov dl,'1'
+
+imprimir:
     mov ah,02h
     int 21h
-    mov dl,10
-    mov ah,02h
-    int 21h
- ;aqui debe ir el codigo para procesar la raiz cuadrada
-    ; Mostrar mensaje
-    lea dx, msg1
-    mov ah, 09h
-    int 21h
+loop bin_loop
 
-    ; Leer número desde teclado (simplificado: aquí deberías implementar rutina para convertir cadena a número)
-    ; Para ejemplo, cargamos un valor fijo:
-    mov num, 400      ; N = 400
+ret
+conversion endp
 
-    ; Aproximación inicial: N/2
-    mov ax, num
-    mov cx, 2
-    div cx            ; AX = N/2
-    mov aprox, ax
-
-    ; Iteraciones del método babilónico
-    mov cx, 5         ; repetir 5 veces
-iteracion:
-    mov ax, num
-    mov bx, aprox
-    div bx            ; AX = N / aprox
-    add ax, aprox     ; AX = aprox + (N/aprox)
-    shr ax, 1         ; AX = (aprox + N/aprox)/2
-    mov aprox, ax
-    loop iteracion
-
-    ; Mostrar mensaje resultado
-    lea dx, msg2
-    mov ah, 09h
+; ============================================
+; ===== CLASIFICACION ========================
+; ============================================
+clasificacion proc
+    lea dx,numero
+    mov ah,09h
     int 21h
 
-    ; Convertir aprox a texto e imprimir (rutina aparte)
-    ; Aquí solo mostramos un carácter como ejemplo
-    mov ax, aprox
-    add ax, '0'
-    mov dl, al
-    mov ah, 02h
-    int 21h
+    call leer_numero
 
+    test ax,1
+    jz es_par
 
-    mov ah,07h
+    lea dx,msgImpar
+    mov ah,09h
     int 21h
     ret
+
+es_par:
+    lea dx,msgPar
+    mov ah,09h
+    int 21h
+    ret
+clasificacion endp
+
+; ============================================
+; ===== RAIZ CUADRADA ========================
+; ============================================
+raiz proc
+    lea dx,numero
+    mov ah,09h
+    int 21h
+
+    call leer_numero
+    mov num,ax
+
+    mov ax,num
+    mov cx,2
+    xor dx,dx
+    div cx
+    mov aprox,ax
+
+    mov cx,7
+iteracion:
+    mov ax,num
+    mov bx,aprox
+    xor dx,dx
+    div bx
+
+    add ax,aprox
+    shr ax,1
+
+    mov aprox,ax
+loop iteracion
+
+    lea dx,msgRaiz
+    mov ah,09h
+    int 21h
+
+    mov ax,aprox
+    call imprimir_numero
+    ret
+raiz endp
+
+; ============================================
+; ===== IMPRIMIR NUMERO ======================
+; ============================================
+imprimir_numero proc
+    mov bx,10
+    mov cx,0
+
+    cmp ax,0
+    jne extrae
+
+    push ax
+    inc cx
+    jmp imprime
+
+extrae:
+    cmp ax,0
+    je imprime
+
+    xor dx,dx
+    div bx
+    push dx
+    inc cx
+    jmp extrae
+
+imprime:
+    pop dx
+    add dl,30h
+    mov ah,02h
+    int 21h
+    loop imprime
+
+    ret
+imprimir_numero endp
+
+; ============================================
+salir:
+mov ah,4Ch
+int 21h
+
 compa endp
 codigo ends
 end compa
