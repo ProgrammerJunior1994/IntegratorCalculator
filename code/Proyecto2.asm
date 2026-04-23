@@ -6,10 +6,13 @@ datos segment para public 'data'
     cad        db "Ingrese su nombre: $"
     bienvenida db "Bienvenido al programa, $"
     nombre     db 30 dup('$')     ; buffer para el nombre
+<<<<<<< HEAD
     msg1 db "Ingrese un numero (0-65535): $"
     msg2 db 13,10,"Raiz aproximada: $"
     num  dw ?
     aprox dw ?
+=======
+>>>>>>> 5d2ec6d1c57369d35f304520de600a5ff221d29f
     m1 db "Ingresa una opción: $"
     opc1 db "1. Conversión de números. $"
     opc2 db "2. Clasificar un número. $"
